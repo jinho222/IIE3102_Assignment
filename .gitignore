@@ -10,6 +10,7 @@ bin
 lib
 .venv
 pyvenv.cfg
+__pycache__
 
 # node
 node_modules
