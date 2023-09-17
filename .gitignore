@@ -1,0 +1,16 @@
+# ide
+.vscode
+.idea
+
+# os
+.DS_Store
+
+# python
+bin
+lib
+.venv
+pyvenv.cfg
+
+# node
+node_modules
+yarn-error.log

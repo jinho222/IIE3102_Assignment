@@ -1,0 +1,14 @@
+{
+  "name": "iie3102-assignment",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/jinho222/iie3102-assignment.git",
+  "author": "jinho222 <jinho020@yonsei.ac.kr>",
+  "license": "MIT",
+  "scripts": {
+    "start:assignment1": "cd assignment1 && source ./bin/activate && nodemon --exec python main.py"
+  },
+  "devDependencies": {
+    "nodemon": "3.0.1"
+  }
+}
