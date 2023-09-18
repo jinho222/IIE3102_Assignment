@@ -4,6 +4,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 from statsmodels.tsa.ar_model import AutoReg 
+from statsmodels.tsa.arima.model import ARIMA
 
 DAY = '일시'
 AVERAGE_TEMPERATURE = '평균기온(°C)'
@@ -54,6 +55,46 @@ def get_dataframe():
         AVERAGE_RELATIVE_HUMIDITY
     ]]
 
+
+    return df
+
+def predict_ar(dataframe, target):
+    '''
+    autoregression
+    @see https://machinelearningmastery.com/time-series-forecasting-methods-in-python-cheat-sheet/ 
+    '''
+    model = AutoReg(np.asarray(dataframe[target]), lags=1)
+    model_fit = model.fit()
+
+    predicted = model_fit.predict(start=len(dataframe), end=len(dataframe))
+    return predicted
+
+def predict_ma(dataframe, target):
+    '''
+    moving average
+    @see https://machinelearningmastery.com/time-series-forecasting-methods-in-python-cheat-sheet/ 
+    '''
+    model = ARIMA(np.asarray(dataframe[target]), order=(0, 0, 1))
+    model_fit = model.fit()
+
+    predicted = model_fit.predict(start=len(dataframe), end=len(dataframe))
+    return predicted
+
+def draw_graph(): 
+    df = get_dataframe()
+    axis = plt.gca()
+    plt.title('weather data')
+    df.plot(kind='line', x=DAY, y=AVERAGE_TEMPERATURE, ax=axis, label="average temperature", xlabel='day')
+    df.plot(kind='line', x=DAY, y=LOWEST_TEMPERATURE, ax=axis, label="lowest temperature", xlabel='day')
+    df.plot(kind='line', x=DAY, y=HIGHEST_TEMPERATURE, ax=axis, label="highest temperature", xlabel='day')
+    df.plot(kind='line', x=DAY, y=HIGHEST_WIND_SPEED, ax=axis, label="higest wind speed", xlabel='day')
+    df.plot(kind='line', x=DAY, y=AVERAGE_WIND_SPEED, ax=axis, label="average wind speed", xlabel='day')
+    df.plot(kind='line', x=DAY, y=AVERAGE_RELATIVE_HUMIDITY, ax=axis, label="average relative humidity", xlabel='day')
+    plt.show()
+
+def app():
+    df = get_dataframe()
+
     df = df.loc[df[DAY].isin(
         [
             '2013-09-27',
@@ -68,36 +109,37 @@ def get_dataframe():
             '2022-09-27',
         ]
     )]
-
-    return df
-
-def predict(dataframe, target):
-    '''
-    @see https://machinelearningmastery.com/time-series-forecasting-methods-in-python-cheat-sheet/ 
-    '''
-    model = AutoReg(np.asarray(dataframe[target]), lags=1)
-    model_fit = model.fit()
-
-    predicted = model_fit.predict(start=len(dataframe), end=len(dataframe))
-    return predicted
-
-def app():
-    df = get_dataframe()
     print('---- observed metrics ----')
     print(df)
 
-    predicted = pd.DataFrame({
+    predicted_with_ar = pd.DataFrame({
         DAY: '2023-09-27',
-        AVERAGE_TEMPERATURE: predict(df, AVERAGE_TEMPERATURE),
-        LOWEST_TEMPERATURE: predict(df, LOWEST_TEMPERATURE),
-        HIGHEST_TEMPERATURE: predict(df, HIGHEST_TEMPERATURE),
-        HIGHEST_WIND_SPEED: predict(df, HIGHEST_WIND_SPEED),
-        AVERAGE_WIND_SPEED: predict(df, AVERAGE_WIND_SPEED),
-        AVERAGE_RELATIVE_HUMIDITY: predict(df, AVERAGE_RELATIVE_HUMIDITY),
+        AVERAGE_TEMPERATURE: predict_ar(df, AVERAGE_TEMPERATURE),
+        LOWEST_TEMPERATURE: predict_ar(df, LOWEST_TEMPERATURE),
+        HIGHEST_TEMPERATURE: predict_ar(df, HIGHEST_TEMPERATURE),
+        HIGHEST_WIND_SPEED: predict_ar(df, HIGHEST_WIND_SPEED),
+        AVERAGE_WIND_SPEED: predict_ar(df, AVERAGE_WIND_SPEED),
+        AVERAGE_RELATIVE_HUMIDITY: predict_ar(df, AVERAGE_RELATIVE_HUMIDITY),
     })
 
-    print('---- predicted ----')
-    print(predicted)
+    print('---- predicted with AR ----')
+    print(predicted_with_ar)
+
+    predicted_with_ma = pd.DataFrame({
+        DAY: '2023-09-27',
+        AVERAGE_TEMPERATURE: predict_ma(df, AVERAGE_TEMPERATURE),
+        LOWEST_TEMPERATURE: predict_ma(df, LOWEST_TEMPERATURE),
+        HIGHEST_TEMPERATURE: predict_ma(df, HIGHEST_TEMPERATURE),
+        HIGHEST_WIND_SPEED: predict_ma(df, HIGHEST_WIND_SPEED),
+        AVERAGE_WIND_SPEED: predict_ma(df, AVERAGE_WIND_SPEED),
+        AVERAGE_RELATIVE_HUMIDITY: predict_ma(df, AVERAGE_RELATIVE_HUMIDITY),
+    })
+
+    print('---- predicted with MA ----')
+    print(predicted_with_ma)
 
 if __name__ == '__main__':
     app()
+
+    # when you want to see the graph of raw data
+    # draw_graph()
